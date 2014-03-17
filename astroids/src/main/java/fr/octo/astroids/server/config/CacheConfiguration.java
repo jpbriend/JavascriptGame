@@ -23,7 +23,7 @@ import java.util.SortedSet;
 
 @Configuration
 @EnableCaching
-@AutoConfigureAfter(value = {MetricsConfiguration.class, DatabaseConfiguration.class})
+@AutoConfigureAfter(value = {DatabaseConfiguration.class})
 public class CacheConfiguration {
 
     private final Logger log = LoggerFactory.getLogger(CacheConfiguration.class);
@@ -34,18 +34,10 @@ public class CacheConfiguration {
     @Inject
     private Environment env;
 
-    @Inject
-    private MetricRegistry metricRegistry;
-
     private net.sf.ehcache.CacheManager cacheManager;
 
     @PreDestroy
     public void destroy() {
-        log.info("Remove Cache Manager metrics");
-        SortedSet<String> names = metricRegistry.getNames();
-        for (String name : names) {
-            metricRegistry.remove(name);
-        }
         log.info("Closing Cache Manager");
         cacheManager.shutdown();
     }
@@ -68,8 +60,6 @@ public class CacheConfiguration {
             net.sf.ehcache.Cache cache = cacheManager.getCache(name);
             if (cache != null) {
                 cache.getCacheConfiguration().setTimeToLiveSeconds(env.getProperty("cache.timeToLiveSeconds", Integer.class, 3600));
-                net.sf.ehcache.Ehcache decoratedCache = InstrumentedEhcache.instrument(metricRegistry, cache);
-                cacheManager.replaceCacheWithDecoratedCache(cache, decoratedCache);
             }
         }
         EhCacheCacheManager ehCacheManager = new EhCacheCacheManager();

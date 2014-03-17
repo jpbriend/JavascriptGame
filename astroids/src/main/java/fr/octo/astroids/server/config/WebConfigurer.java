@@ -10,6 +10,7 @@ import fr.octo.astroids.server.web.filter.gzip.GZipServletFilter;
 import org.atmosphere.cache.UUIDBroadcasterCache;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereServlet;
+import org.atmosphere.spring.SpringObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -38,18 +39,11 @@ public class WebConfigurer implements ServletContextInitializer {
     @Inject
     private Environment env;
 
-    @Inject
-    private MetricRegistry metricRegistry;
-
-    @Inject
-    private HealthCheckRegistry healthCheckRegistry;
-
     @Override
     public void onStartup(ServletContext servletContext) throws ServletException {
         log.info("Web application configuration, using profiles: {}", Arrays.toString(env.getActiveProfiles()));
         EnumSet<DispatcherType> disps = EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD, DispatcherType.ASYNC);
 
-        initMetrics(servletContext, disps);
         initAtmosphereServlet(servletContext);
         if (env.acceptsProfiles(Constants.SPRING_PROFILE_PRODUCTION)) {
             initStaticResourcesProductionFilter(servletContext, disps);
@@ -77,7 +71,6 @@ public class WebConfigurer implements ServletContextInitializer {
         compressingFilter.addMappingForUrlPatterns(disps, true, "*.html");
         compressingFilter.addMappingForUrlPatterns(disps, true, "*.js");
         compressingFilter.addMappingForUrlPatterns(disps, true, "/app/rest/*");
-        compressingFilter.addMappingForUrlPatterns(disps, true, "/metrics/*");
 
         compressingFilter.setAsyncSupported(true);
     }
@@ -121,32 +114,6 @@ public class WebConfigurer implements ServletContextInitializer {
     }
 
     /**
-     * Initializes Metrics.
-     */
-    private void initMetrics(ServletContext servletContext, EnumSet<DispatcherType> disps) {
-        log.debug("Initializing Metrics registries");
-        servletContext.setAttribute(InstrumentedFilter.REGISTRY_ATTRIBUTE,
-                metricRegistry);
-        servletContext.setAttribute(MetricsServlet.METRICS_REGISTRY,
-                metricRegistry);
-
-        log.debug("Registering Metrics Filter");
-        FilterRegistration.Dynamic metricsFilter = servletContext.addFilter("webappMetricsFilter",
-                new InstrumentedFilter());
-
-        metricsFilter.addMappingForUrlPatterns(disps, true, "/*");
-        metricsFilter.setAsyncSupported(true);
-
-        log.debug("Registering Metrics Servlet");
-        ServletRegistration.Dynamic metricsAdminServlet =
-                servletContext.addServlet("metricsServlet", new MetricsServlet());
-
-        metricsAdminServlet.addMapping("/metrics/metrics/*");
-        metricsAdminServlet.setAsyncSupported(true);
-        metricsAdminServlet.setLoadOnStartup(2);
-    }
-
-    /**
      * Initializes Atmosphere.
      */
     private void initAtmosphereServlet(ServletContext servletContext) {
@@ -163,6 +130,7 @@ public class WebConfigurer implements ServletContextInitializer {
         atmosphereServlet.setInitParameter("org.atmosphere.cpr.broadcaster.shareableThreadPool", "true");
         atmosphereServlet.setInitParameter("org.atmosphere.cpr.broadcaster.maxProcessingThreads", "10");
         atmosphereServlet.setInitParameter("org.atmosphere.cpr.broadcaster.maxAsyncWriteThreads", "10");
+        atmosphereServlet.setInitParameter("org.atmosphere.cpr.objectFactory", "org.atmosphere.spring.SpringObjectFactory");
         servletContext.addListener(new org.atmosphere.cpr.SessionSupport());
 
         atmosphereServlet.addMapping("/websocket/*");
