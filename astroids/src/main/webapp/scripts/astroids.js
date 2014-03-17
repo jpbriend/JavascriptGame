@@ -7,11 +7,7 @@
 
 var AstroidsModule = angular.module('AstroidsModule', ['angular.atmosphere']);
 
-AstroidsModule.factory('socket', function () {
-        return io.connect('', {'resource': 'websocket'});
-    });
-
-AstroidsModule.controller('AstroidsController', function($scope, atmosphereService, $interval) {
+AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$interval', 'shipDataService', function($rootScope, $scope, $interval, shipDataService) {
 
     var canvas = document.getElementById('astroids');
     canvas.width = $("#astroids").css("width").substr(0, $("#astroids").css("width").length - 2);
@@ -36,6 +32,12 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
         }
     };
 
+    $scope.model = {};
+
+    $rootScope.$on('shipMessage', function(event, message) {
+        $scope.otherPlayer[message.user] = message;
+    });
+
     $scope.otherPlayer = [];
     angular.extend($scope, {
         player: {
@@ -58,70 +60,8 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
         }
     });
 
-    $scope.model = {
-        transport: 'websocket',
-        messages: []
-    };
-
-    var socket;
-
-    var request = {
-        url: '/websocket/receiveShipData',
-        contentType: 'application/json',
-        logLevel: 'debug',
-        transport: 'websocket',
-        trackMessageLength: true,
-        reconnectInterval: 5000,
-        enableXDR: true,
-        timeout: 60000
-    };
-
-    request.onOpen = function(response){
-        $scope.model.transport = response.transport;
-        $scope.model.connected = true;
-        $scope.model.content = 'Atmosphere connected using ' + response.transport;
-    };
-
-    request.onClientTimeout = function(response){
-        $scope.model.content = 'Client closed the connection after a timeout. Reconnecting in ' + request.reconnectInterval;
-        $scope.model.connected = false;
-
-        setTimeout(function(){
-            socket = atmosphereService.subscribe(request);
-        }, request.reconnectInterval);
-    };
-
-    request.onReopen = function(response){
-        $scope.model.connected = true;
-        $scope.model.content = 'Atmosphere re-connected using ' + response.transport;
-    };
-
-    request.onMessage = function(data){
-        var responseBody = data.responseBody;
-        var message = atmosphere.util.parseJSON(responseBody);
-        $scope.otherPlayer[message.user] = message;
-    };
-
-    request.onClose = function(response){
-        $scope.model.connected = false;
-        $scope.model.content = 'Server closed the connection after a timeout';
-        socket.push(atmosphere.util.stringifyJSON({ author: $scope.model.name, message: 'disconnecting' }));
-    };
-
-    request.onError = function(response){
-        $scope.model.content = "Sorry, but there's some problem with your socket or the server is down";
-        $scope.model.logged = false;
-    };
-
-    request.onReconnect = function(request, response){
-        $scope.model.content = 'Connection lost. Trying to reconnect ' + request.reconnectInterval;
-        $scope.model.connected = false;
-    };
-
-    socket = atmosphereService.subscribe(request);
-
     $scope.$watch('player', function(newValue, oldValue) {
-        socket.push(atmosphere.util.stringifyJSON(newValue));
+        shipDataService.send(newValue);
     }, true);
 
     $scope.$watch('keys', function(newValue, oldValue, scope) {
@@ -205,7 +145,7 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
 
     // Run at 30 fps
     $interval(gameLoop, 1000/30);
-});
+}]);
 
 AstroidsModule.directive('ngKeycontrol', function() {
     return function(scope, element, attrs) {
