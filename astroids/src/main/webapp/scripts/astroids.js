@@ -7,30 +7,12 @@
 
 var AstroidsModule = angular.module('AstroidsModule', ['angular.atmosphere']);
 
-AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$interval', 'shipDataService', function($rootScope, $scope, $interval, shipDataService) {
+AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$interval', 'shipDataService', 'utils', function($rootScope, $scope, $interval, shipDataService, utils) {
 
     var canvas = document.getElementById('astroids');
     canvas.width = $("#astroids").css("width").substr(0, $("#astroids").css("width").length - 2);
     canvas.height = canvas.width * (9 / 16);
     var context = canvas.getContext('2d');
-
-    var fps = {
-        startTime : 0,
-        frameNumber : 0,
-        getFPS : function(){
-            this.frameNumber++;
-            var d = new Date().getTime(),
-                currentTime = ( d - this.startTime ) / 1000,
-                result = Math.floor( ( this.frameNumber / currentTime ) );
-
-            if( currentTime > 1 ){
-                this.startTime = new Date().getTime();
-                this.frameNumber = 0;
-            }
-            return result;
-
-        }
-    };
 
     $scope.model = {};
 
@@ -77,7 +59,7 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
         shipControl();
         bulletControl();
         drawCanvas();
-        $scope.model.content = fps.getFPS() + " fps";
+        $scope.model.content = utils.getFPS() + " fps";
     };
     var drawCanvas = function() {
         context.fillStyle = 'rgb(16, 16, 16)';
