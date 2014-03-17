@@ -8,15 +8,33 @@
 var AstroidsModule = angular.module('AstroidsModule', ['angular.atmosphere']);
 
 AstroidsModule.factory('socket', function () {
-        return io.connect('http://localhost:8080', {'resource': 'websocket'});
+        return io.connect('', {'resource': 'websocket'});
     });
 
-AstroidsModule.controller('AstroidsController', function($scope, atmosphereService) {
+AstroidsModule.controller('AstroidsController', function($scope, atmosphereService, $interval) {
 
     var canvas = document.getElementById('astroids');
     canvas.width = $("#astroids").css("width").substr(0, $("#astroids").css("width").length - 2);
     canvas.height = canvas.width * (9 / 16);
     var context = canvas.getContext('2d');
+
+    var fps = {
+        startTime : 0,
+        frameNumber : 0,
+        getFPS : function(){
+            this.frameNumber++;
+            var d = new Date().getTime(),
+                currentTime = ( d - this.startTime ) / 1000,
+                result = Math.floor( ( this.frameNumber / currentTime ) );
+
+            if( currentTime > 1 ){
+                this.startTime = new Date().getTime();
+                this.frameNumber = 0;
+            }
+            return result;
+
+        }
+    };
 
     $scope.otherPlayer = [];
     angular.extend($scope, {
@@ -48,7 +66,7 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
     var socket;
 
     var request = {
-        url: '/websocket/recieveShipData',
+        url: '/websocket/receiveShipData',
         contentType: 'application/json',
         logLevel: 'debug',
         transport: 'websocket',
@@ -102,13 +120,6 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
 
     socket = atmosphereService.subscribe(request);
 
-    /*
-    socket.on('recieveShipData', function(data) {
-        $scope.otherPlayer[data.name] = data;
-    });
-    socket.on('disconnectShipData', function(data) {
-        delete $scope.otherPlayer[data];
-    });*/
     $scope.$watch('player', function(newValue, oldValue) {
         socket.push(atmosphere.util.stringifyJSON(newValue));
     }, true);
@@ -123,11 +134,10 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
         }
     }, true);
     var gameLoop = function() {
-        $scope.$apply(function() {
-            shipControl();
-            bulletControl();
-            drawCanvas();
-        });
+        shipControl();
+        bulletControl();
+        drawCanvas();
+        $scope.model.content = fps.getFPS() + " fps";
     };
     var drawCanvas = function() {
         context.fillStyle = 'rgb(16, 16, 16)';
@@ -140,7 +150,6 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
 
     };
     var drawOtherShips = function() {
-        var ship;
         for (name in $scope.otherPlayer) {
             var player = $scope.otherPlayer[name];
             context.save();
@@ -193,7 +202,9 @@ AstroidsModule.controller('AstroidsController', function($scope, atmosphereServi
         $scope.player.x = ($scope.player.x + $scope.player.dx).mod(canvas.width);
         $scope.player.y = ($scope.player.y - $scope.player.dy).mod(canvas.height);
     };
-    var interval = setInterval(gameLoop, 1000 / 15);
+
+    // Run at 30 fps
+    $interval(gameLoop, 1000/30);
 });
 
 AstroidsModule.directive('ngKeycontrol', function() {
