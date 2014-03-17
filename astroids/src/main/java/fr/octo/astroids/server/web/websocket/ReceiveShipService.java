@@ -18,8 +18,7 @@ public class ReceiveShipService {
 
     private final static Logger logger = LoggerFactory.getLogger(ReceiveShipService.class);
 
-    private Broadcaster b =
-            BroadcasterFactory.getDefault().lookup("/websocket/recieveShipData", true);
+    private Broadcaster b = BroadcasterFactory.getDefault().lookup("/websocket/recieveShipData", true);
 
     @Ready
     public void onReady(AtmosphereResource r) {
