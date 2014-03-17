@@ -1,0 +1,8 @@
+{
+  "generator-jhipster": {
+    "baseName": "astroids-server",
+    "packageName": "fr.octo.astroids.server",
+    "packageFolder": "fr/octo/astroids/server",
+    "hibernateCache": "ehcache"
+  }
+}
