@@ -1,16 +1,11 @@
 package fr.octo.astroids.server.config;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.health.HealthCheckRegistry;
-import com.codahale.metrics.servlet.InstrumentedFilter;
-import com.codahale.metrics.servlets.MetricsServlet;
 import fr.octo.astroids.server.web.filter.CachingHttpHeadersFilter;
 import fr.octo.astroids.server.web.filter.StaticResourcesProductionFilter;
 import fr.octo.astroids.server.web.filter.gzip.GZipServletFilter;
 import org.atmosphere.cache.UUIDBroadcasterCache;
 import org.atmosphere.cpr.AtmosphereFramework;
 import org.atmosphere.cpr.AtmosphereServlet;
-import org.atmosphere.spring.SpringObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -130,7 +125,6 @@ public class WebConfigurer implements ServletContextInitializer {
         atmosphereServlet.setInitParameter("org.atmosphere.cpr.broadcaster.shareableThreadPool", "true");
         atmosphereServlet.setInitParameter("org.atmosphere.cpr.broadcaster.maxProcessingThreads", "10");
         atmosphereServlet.setInitParameter("org.atmosphere.cpr.broadcaster.maxAsyncWriteThreads", "10");
-        atmosphereServlet.setInitParameter("org.atmosphere.cpr.objectFactory", "org.atmosphere.spring.SpringObjectFactory");
         servletContext.addListener(new org.atmosphere.cpr.SessionSupport());
 
         atmosphereServlet.addMapping("/websocket/*");

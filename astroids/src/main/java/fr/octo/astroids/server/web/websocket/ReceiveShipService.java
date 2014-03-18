@@ -1,6 +1,8 @@
 package fr.octo.astroids.server.web.websocket;
 
+import fr.octo.astroids.server.config.ApplicationContextProvider;
 import fr.octo.astroids.server.domain.Ship;
+import fr.octo.astroids.server.service.GameService;
 import fr.octo.astroids.server.service.PlayerService;
 import fr.octo.astroids.server.web.websocket.dto.ShipEncoderDecoder;
 import org.atmosphere.config.service.*;
@@ -14,12 +16,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import javax.inject.Inject;
 import java.io.IOException;
 
 @ManagedService(path = "/websocket/receiveShipData")
 @Singleton
-public class ReceiveShipService implements ApplicationContextAware{
+public class ReceiveShipService {
 
     private final static Logger logger = LoggerFactory.getLogger(ReceiveShipService.class);
 
@@ -27,8 +28,8 @@ public class ReceiveShipService implements ApplicationContextAware{
 
     private ShipEncoderDecoder shipDecodEncod = new ShipEncoderDecoder();
 
-    // F...g DI does not work with ManagedService (despite everything tried)
-    private ApplicationContext applicationContext;
+    private PlayerService playerService;
+    private GameService gameService;
 
     @Ready
     public void onReady(AtmosphereResource r) {
@@ -44,19 +45,25 @@ public class ReceiveShipService implements ApplicationContextAware{
 
     @Message(decoders = {ShipEncoderDecoder.class})
     public void onMessage(AtmosphereResource atmosphereResource, Ship ship) throws IOException {
-        String message = shipDecodEncod.encode(ship);
+        // String message = shipDecodEncod.encode(ship);
+        this.getGameService().addShipMessage(ship);
 
-        for (AtmosphereResource trackerResource : b.getAtmosphereResources()) {
+        /*for (AtmosphereResource trackerResource : b.getAtmosphereResources()) {
             trackerResource.getResponse().write(message);
-        }
+        }*/
     }
 
     private PlayerService getPlayerService() {
-        return applicationContext.getBean(PlayerService.class);
+        if (playerService == null) {
+            this.playerService = ApplicationContextProvider.getApplicationContext().getBean(PlayerService.class);
+        }
+        return playerService;
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+    private GameService getGameService() {
+        if (gameService == null) {
+            this.gameService = ApplicationContextProvider.getApplicationContext().getBean(GameService.class);
+        }
+        return gameService;
     }
 }

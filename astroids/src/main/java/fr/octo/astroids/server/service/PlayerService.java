@@ -9,7 +9,7 @@ import java.util.List;
 
 
 @Service
-public class PlayerService {
+public class PlayerService  {
     private final static Logger logger = LoggerFactory.getLogger(PlayerService.class);
 
     private List<String> players = new ArrayList<>();
@@ -19,7 +19,7 @@ public class PlayerService {
         if (players.contains(playerId)) {
             logger.info("Player " + playerId + " already connected. Maybe it's a reconnect.");
         } else {
-            logger.info("New player detected. Registering him : " + playerId);
+            logger.info("New player detected. Registering it : " + playerId);
             this.players.add(playerId);
         }
     }

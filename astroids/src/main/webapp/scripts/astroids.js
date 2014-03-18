@@ -76,8 +76,14 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
             var player = $scope.otherPlayer[name];
             context.save();
             context.translate(player.x, player.y);
-            context.fillStyle = 'rgb(200,200,200)';
-            context.strokeStyle = 'rgb(200,200,200)';
+            if (player.isHit) {
+                context.fillStyle = 'rgb(255,0,0)';
+                context.strokeStyle = 'rgb(255,0,0)';
+            } else {
+                context.fillStyle = 'rgb(200,200,200)';
+                context.strokeStyle = 'rgb(200,200,200)';
+            }
+
             context.fillText(player.user, 10, 10);
             context.rotate(player.rotation)
             context.beginPath();

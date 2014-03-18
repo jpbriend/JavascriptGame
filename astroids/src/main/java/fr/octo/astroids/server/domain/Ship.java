@@ -28,8 +28,10 @@ public class Ship {
 
     public List<Bullet> bullets;
 
+    public Boolean isHit;
+
     public Ship() {
-        this.bullets = new ArrayList<Bullet>();
+        this.bullets = new ArrayList<>();
     }
 
     @Override
@@ -68,5 +70,23 @@ public class Ship {
         result = 31 * result + (user != null ? user.hashCode() : 0);
         result = 31 * result + (bullets != null ? bullets.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Ship{" +
+                "id='" + id + '\'' +
+                ", acceleration=" + acceleration +
+                ", speed=" + speed +
+                ", dx=" + dx +
+                ", dy=" + dy +
+                ", rotation=" + rotation +
+                ", direction=" + direction +
+                ", x=" + x +
+                ", y=" + y +
+                ", user='" + user + '\'' +
+                ", bullets=" + bullets +
+                ", isHit=" + isHit +
+                '}';
     }
 }
