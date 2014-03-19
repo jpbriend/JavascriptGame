@@ -13,6 +13,9 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
     canvas.width = $("#astroids").css("width").substr(0, $("#astroids").css("width").length - 2);
     canvas.height = canvas.width * (9 / 16);
     var context = canvas.getContext('2d');
+    var shipSprite = loadImage("ship_sprites_transparent.png");
+    var shipNormalCoordinates = {x1: 53, y1: 381, width: 192, height: 155, displayedWidth: 19, displayedHeight: 15};
+    var shipMotorCoordinates = {x1: 55, y1: 24, width: 192, height: 300, displayedWidth: 19, displayedHeight: 29};
 
     $scope.model = {};
 
@@ -32,7 +35,8 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
             x: canvas.width / 2,
             y: canvas.height / 2,
             user: "",
-            bullets: []
+            bullets: [],
+            isHit: false
         },
         keys: {
             w: false,
@@ -84,15 +88,31 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
                 context.strokeStyle = 'rgb(200,200,200)';
             }
 
-            context.fillText(player.user, 10, 10);
-            context.rotate(player.rotation)
-            context.beginPath();
-            context.moveTo(0, -5);
-            context.lineTo(-3, 5);
-            context.lineTo(0, 3);
-            context.lineTo(3, 5);
-            context.closePath();
-            context.stroke();
+            context.fillText(player.user, 12, 10);
+            context.rotate(player.rotation);
+
+            if ($scope.keys.w) {
+                context.drawImage(shipSprite,
+                    shipMotorCoordinates.x1,
+                    shipMotorCoordinates.y1,
+                    shipMotorCoordinates.width,
+                    shipMotorCoordinates.height,
+                    -9,
+                    -5.5,
+                    shipMotorCoordinates.displayedWidth,
+                    shipMotorCoordinates.displayedHeight);
+            } else {
+                context.drawImage(shipSprite,
+                    shipNormalCoordinates.x1,
+                    shipNormalCoordinates.y1,
+                    shipNormalCoordinates.width,
+                    shipNormalCoordinates.height,
+                    -9,
+                    -5.5,
+                    shipNormalCoordinates.displayedWidth,
+                    shipNormalCoordinates.displayedHeight);
+            }
+
             context.restore();
             if (player.bullets) {
                 for (var i = 0; i < player.bullets.length; i++) {
@@ -191,3 +211,13 @@ Number.prototype.max = function(n) {
 Number.prototype.pos = function() {
     return (this <= 0) ? 0 : this;
 };
+
+// [name] image file name
+function loadImage(name) {
+    // create new image object
+    var image = new Image();
+    // load image
+    image.src = "/pictures/" + name;
+    // return image object
+    return image;
+}

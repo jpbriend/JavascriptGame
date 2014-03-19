@@ -114,7 +114,7 @@ public class GameService {
     private Map<String, Ship> processShipMessagesToServerSideShips(List<Ship> shipsAfterCollisionDetection) {
         Map<String, Ship> retour = new HashMap<>();
         for (Ship s : shipsAfterCollisionDetection) {
-            logger.info("Processing Ship message : " + s.toString());
+            // logger.info("Processing Ship message : " + s.toString());
             // Triangle t = new Triangle(new Vector2(s.x, s.y), new Vector2(0d, -5d), new Vector2(-3d, 5d), new Vector2(3d, 5d), s.rotation);
             // ServerSideShip ship = new ServerSideShip(s.user, t);
             retour.put(s.user, s);
