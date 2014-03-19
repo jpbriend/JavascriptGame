@@ -7,7 +7,7 @@
 
 var AstroidsModule = angular.module('AstroidsModule', ['angular.atmosphere']);
 
-AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$interval', 'shipDataService', 'utils', function($rootScope, $scope, $interval, shipDataService, utils) {
+AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$interval', 'shipDataService', 'connectionsService', 'utils', function($rootScope, $scope, $interval, shipDataService, connectionsService, utils) {
 
     var canvas = document.getElementById('astroids');
     canvas.width = $("#astroids").css("width").substr(0, $("#astroids").css("width").length - 2);
@@ -19,13 +19,23 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
 
     $scope.model = {};
 
-    $rootScope.$on('shipMessage', function(event, message) {
-        $scope.otherPlayer[message.user] = message;
+    $rootScope.$on('shipMessage', function(event, ship) {
+        $scope.otherPlayer[ship.id] = ship;
+    });
+
+    $rootScope.$on('connections', function(event, message) {
+        if (message.action = 'connected') {
+            $rootScope.clientId = message.target;
+            $scope.player.id = message.target;
+        } else if (message.action = 'disconnected') {
+            delete $scope.otherPlayer[message.target];
+        }
     });
 
     $scope.otherPlayer = [];
     angular.extend($scope, {
         player: {
+            id: 0,
             acceleration: 0.3,
             speed: false,
             dx: 0.0,
@@ -36,7 +46,8 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
             y: canvas.height / 2,
             user: "",
             bullets: [],
-            isHit: false
+            isHit: false,
+            areMotorOn: false
         },
         keys: {
             w: false,
@@ -60,6 +71,7 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
         }
     }, true);
     var gameLoop = function() {
+        checkConnected();
         shipControl();
         bulletControl();
         drawCanvas();
@@ -91,7 +103,7 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
             context.fillText(player.user, 12, 10);
             context.rotate(player.rotation);
 
-            if ($scope.keys.w) {
+            if (player.areMotorOn == true) {
                 context.drawImage(shipSprite,
                     shipMotorCoordinates.x1,
                     shipMotorCoordinates.y1,
@@ -124,7 +136,7 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
                 }
             }
         }
-    }
+    };
 
     var bulletControl = function() {
         for (var i = $scope.player.bullets.length - 1; i >= 0; i--) {
@@ -151,6 +163,14 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
         $scope.player.y = ($scope.player.y - $scope.player.dy).mod(canvas.height);
     };
 
+    var checkConnected = function() {
+        if (typeof $rootScope.clientId == 'undefined') {
+            // Connect to server and get a player ID
+            console.log('Registering with the server ...');
+            connectionsService.send({ "action": "connection", "target": "0" });
+        }
+    };
+
     // Run at 30 fps
     $interval(gameLoop, 1000/30);
 }]);
@@ -162,6 +182,7 @@ AstroidsModule.directive('ngKeycontrol', function() {
                 switch (event.which) {
                     case 87:
                         scope.keys.w = true;
+                        scope.player.areMotorOn = true;
                         break;
                     case 65:
                         scope.keys.a = true;
@@ -181,6 +202,7 @@ AstroidsModule.directive('ngKeycontrol', function() {
                 switch (event.which) {
                     case 87:
                         scope.keys.w = false;
+                        scope.player.areMotorOn = false;
                         break;
                     case 65:
                         scope.keys.a = false;

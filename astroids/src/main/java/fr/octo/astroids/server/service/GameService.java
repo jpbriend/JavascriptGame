@@ -1,16 +1,12 @@
 package fr.octo.astroids.server.service;
 
-import fr.octo.astroids.server.domain.ServerSideShip;
 import fr.octo.astroids.server.domain.Ship;
 import fr.octo.astroids.server.domain.Triangle;
 import fr.octo.astroids.server.domain.Vector2;
 import fr.octo.astroids.server.utils.Geometry;
-import fr.octo.astroids.server.web.websocket.dto.ShipEncoderDecoder;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.atmosphere.cpr.Broadcaster;
-import org.atmosphere.cpr.BroadcasterFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +24,9 @@ public class GameService {
     private final static Integer FRAMES_PER_SECOND = 30;
 
     private Integer maxWorkingTimePerFrame = 1000 / FRAMES_PER_SECOND;
+
+    @Autowired
+    private CommunicationService communicationService;
 
     @Async
     public void gameLoop() {
@@ -62,10 +61,6 @@ public class GameService {
 
     private Queue<Ship> shipQueue = new LinkedList<>();
 
-    // TODO : move to a communication service
-    private Broadcaster b = null;
-    private ShipEncoderDecoder shipDecodEncod = new ShipEncoderDecoder();
-
     /**
      * Tick() is executed each XXXms and updates the game system according to users inputs.
      */
@@ -75,12 +70,7 @@ public class GameService {
         Map<String, Ship> ships = processShipMessagesToServerSideShips(shipsAfterCollisionDetection);
 
         // Send these events to all clients
-        for (Ship s : ships.values()) {
-            String message = shipDecodEncod.encode(s);
-            for (AtmosphereResource trackerResource : getBroadcaster("/websocket/receiveShipData").getAtmosphereResources()) {
-                trackerResource.getResponse().write(message);
-            }
-        }
+        this.communicationService.sendShips(ships.values());
     }
 
     private List<Ship> checkCollisions() {
@@ -117,17 +107,10 @@ public class GameService {
             // logger.info("Processing Ship message : " + s.toString());
             // Triangle t = new Triangle(new Vector2(s.x, s.y), new Vector2(0d, -5d), new Vector2(-3d, 5d), new Vector2(3d, 5d), s.rotation);
             // ServerSideShip ship = new ServerSideShip(s.user, t);
-            retour.put(s.user, s);
+            retour.put(s.id, s);
         }
 
         return retour;
-    }
-
-    private Broadcaster getBroadcaster(String websocket) {
-        if (b == null) {
-            b = BroadcasterFactory.getDefault().lookup(websocket, true);
-        }
-        return b;
     }
 
     public void addShipMessage(Ship ship) {

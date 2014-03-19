@@ -19,45 +19,13 @@ import org.springframework.context.ApplicationContextAware;
 import java.io.IOException;
 
 @ManagedService(path = "/websocket/receiveShipData")
-@Singleton
 public class ReceiveShipService {
 
-    private final static Logger logger = LoggerFactory.getLogger(ReceiveShipService.class);
-
-    private Broadcaster b = BroadcasterFactory.getDefault().lookup("/websocket/receiveShipData", true);
-
-    private ShipEncoderDecoder shipDecodEncod = new ShipEncoderDecoder();
-
-    private PlayerService playerService;
     private GameService gameService;
-
-    @Ready
-    public void onReady(AtmosphereResource r) {
-        logger.info("Client connected : " + r.uuid());
-        getPlayerService().registerPlayer(r.uuid());
-    }
-
-    @Disconnect
-    public void onDisconnect(AtmosphereResourceEvent event) throws IOException {
-        logger.info("Client disconnected : " + event.getResource().uuid());
-        getPlayerService().unRegisterPlayer(event.getResource().uuid());
-    }
 
     @Message(decoders = {ShipEncoderDecoder.class})
     public void onMessage(AtmosphereResource atmosphereResource, Ship ship) throws IOException {
-        // String message = shipDecodEncod.encode(ship);
         this.getGameService().addShipMessage(ship);
-
-        /*for (AtmosphereResource trackerResource : b.getAtmosphereResources()) {
-            trackerResource.getResponse().write(message);
-        }*/
-    }
-
-    private PlayerService getPlayerService() {
-        if (playerService == null) {
-            this.playerService = ApplicationContextProvider.getApplicationContext().getBean(PlayerService.class);
-        }
-        return playerService;
     }
 
     private GameService getGameService() {

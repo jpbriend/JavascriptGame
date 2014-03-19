@@ -13,8 +13,10 @@
         <nav role="navigation" class="navbar navbar-inverse">
             <div class="navbar-header">
                 <button type="button" data-toggle="collapse" data-target=".navbar-ex1-collapse" class="navbar-toggle">
-                    <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span
-                        class="icon-bar"></span><span class="icon-bar"></span></button>
+                    <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
                 <a href="/" class="navbar-brand">Asteroids</a></div>
             <div class="collapse navbar-collapse navbar-ex1-collapse">
                 <ul class="nav navbar-nav">
@@ -22,9 +24,19 @@
                     <li><a href="#">About</a></li>
                 </ul>
                 <form role="search" class="navbar-form navbar-left">
-                    <div class="form-group"><input type="text" placeholder="Username" ng-model="player.user"
-                                                   class="form-control"></div>
+                    <div class="form-group">
+                        <input type="text"
+                               placeholder="Username"
+                               ng-model="player.user"
+                               class="form-control" />
+                    </div>
                 </form>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="active"><a href="#">W = Motors on</a></li>
+                    <li class="active"><a href="#">A = Left</a></li>
+                    <li class="active"><a href="#">D = Right</a></li>
+                    <li class="active"><a href="#">Space = Fire</a></li>
+                </ul>
             </div>
         </nav>
     </div>

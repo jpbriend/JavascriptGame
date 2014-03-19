@@ -30,6 +30,8 @@ public class Ship {
 
     public Boolean isHit;
 
+    public Boolean areMotorOn;
+
     public Ship() {
         this.bullets = new ArrayList<>();
     }
@@ -87,6 +89,7 @@ public class Ship {
                 ", user='" + user + '\'' +
                 ", bullets=" + bullets +
                 ", isHit=" + isHit +
+                ", areMotorOn=" + areMotorOn +
                 '}';
     }
 }

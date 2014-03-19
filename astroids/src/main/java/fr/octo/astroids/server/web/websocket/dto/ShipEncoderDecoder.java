@@ -22,7 +22,7 @@ public class ShipEncoderDecoder implements Encoder<Ship, String>, Decoder<String
         try {
             return jsonMapper.writeValueAsString(s);
         } catch (IOException e) {
-            log.error("Error while encoding the String: {}", e.getMessage());
+            log.error("Error while encoding the String: {}", e);
             throw new RuntimeException(e);
         }
     }
@@ -32,7 +32,7 @@ public class ShipEncoderDecoder implements Encoder<Ship, String>, Decoder<String
         try {
             return jsonMapper.readValue(s, Ship.class);
         } catch (IOException e) {
-            log.error("Error while decoding the String: {}", e.getMessage());
+            log.error("Error while decoding the String: {}", e);
             throw new RuntimeException(e);
         }
     }
