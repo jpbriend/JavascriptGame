@@ -13,9 +13,9 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
     canvas.width = $("#astroids").css("width").substr(0, $("#astroids").css("width").length - 2);
     canvas.height = canvas.width * (9 / 16);
     var context = canvas.getContext('2d');
-    var shipSprite = loadImage("ship_sprites_transparent.png");
-    var shipNormalCoordinates = {x1: 53, y1: 381, width: 192, height: 155, displayedWidth: 19, displayedHeight: 15};
-    var shipMotorCoordinates = {x1: 55, y1: 24, width: 192, height: 300, displayedWidth: 19, displayedHeight: 29};
+    var shipSprite = loadImage("double_ship.png");
+    var shipNormalCoordinates = {x1: 0, y1: 0, width: 90, height: 90, displayedWidth: 90, displayedHeight: 90};
+    var shipMotorCoordinates = {x1: 90, y1: 0, width: 90, height: 90, displayedWidth: 90, displayedHeight: 90};
 
     $scope.model = {};
 
@@ -40,7 +40,7 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
             speed: false,
             dx: 0.0,
             dy: 0.0,
-            rotation: 0.0,
+            rotation: 0,
             direction: 0.0,
             x: canvas.width / 2,
             y: canvas.height / 2,
@@ -102,29 +102,19 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
             }
 
             context.fillText(player.user, 12, 10);
-            context.rotate(player.rotation);
+            context.rotate(player.rotation - Math.PI / 2); // we need to remove PI/2 because the image is turned of PI/2
 
-            if (player.areMotorOn == true) {
-                context.drawImage(shipSprite,
-                    shipMotorCoordinates.x1,
-                    shipMotorCoordinates.y1,
-                    shipMotorCoordinates.width,
-                    shipMotorCoordinates.height,
-                    -9,
-                    -5.5,
-                    shipMotorCoordinates.displayedWidth,
-                    shipMotorCoordinates.displayedHeight);
-            } else {
-                context.drawImage(shipSprite,
-                    shipNormalCoordinates.x1,
-                    shipNormalCoordinates.y1,
-                    shipNormalCoordinates.width,
-                    shipNormalCoordinates.height,
-                    -9,
-                    -5.5,
-                    shipNormalCoordinates.displayedWidth,
-                    shipNormalCoordinates.displayedHeight);
-            }
+            var currentShip = (player.areMotorOn ? shipMotorCoordinates : shipNormalCoordinates);
+
+            context.drawImage(shipSprite,
+                currentShip.x1,
+                currentShip.y1,
+                currentShip.width,
+                currentShip.height,
+                -currentShip.displayedWidth / 2,
+                -currentShip.displayedHeight / 2,
+                currentShip.displayedWidth,
+                currentShip.displayedHeight);
 
             context.restore();
             if (player.bullets) {
