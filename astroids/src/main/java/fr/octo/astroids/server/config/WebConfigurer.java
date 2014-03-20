@@ -85,6 +85,7 @@ public class WebConfigurer implements ServletContextInitializer {
         staticResourcesProductionFilter.addMappingForUrlPatterns(disps, true, "/index.html");
         staticResourcesProductionFilter.addMappingForUrlPatterns(disps, true, "/images/*");
         staticResourcesProductionFilter.addMappingForUrlPatterns(disps, true, "/fonts/*");
+        staticResourcesProductionFilter.addMappingForUrlPatterns(disps, true, "/pictures/*");
         staticResourcesProductionFilter.addMappingForUrlPatterns(disps, true, "/scripts/*");
         staticResourcesProductionFilter.addMappingForUrlPatterns(disps, true, "/styles/*");
         staticResourcesProductionFilter.addMappingForUrlPatterns(disps, true, "/views/*");
@@ -103,6 +104,7 @@ public class WebConfigurer implements ServletContextInitializer {
 
         cachingHttpHeadersFilter.addMappingForUrlPatterns(disps, true, "/images/*");
         cachingHttpHeadersFilter.addMappingForUrlPatterns(disps, true, "/fonts/*");
+        cachingHttpHeadersFilter.addMappingForUrlPatterns(disps, true, "/pictures/*");
         cachingHttpHeadersFilter.addMappingForUrlPatterns(disps, true, "/scripts/*");
         cachingHttpHeadersFilter.addMappingForUrlPatterns(disps, true, "/styles/*");
         cachingHttpHeadersFilter.setAsyncSupported(true);

@@ -45,11 +45,8 @@
         <div class="jumbotron invert">
             <div class="container">
                 <div class="row">
-                    <div class="overlay"><p>dx : {{player.dx}} </p>
-
-                        <p>dy : {{player.dy}}</p>
-
-                        <p>bullets : {{player.bullets.length}}</p></div>
+                    <div class="overlay" ng-bind-html="leapmotion">
+                    </div>
                     <canvas id="astroids" tabindex="0" class="col-md-12"></canvas>
                 </div>
             </div>
@@ -74,6 +71,7 @@
 <script src="scripts/astroids-communication.js"></script>
 <script src="scripts/astroids-utils.js"></script>
 <script src="scripts/angular-atmosphere-service.js"></script>
+<script src="//js.leapmotion.com/leap-0.4.3.min.js"></script>
 <!--<script src="scripts/controllers.js"></script>
 <script src="scripts/services.js"></script>
 <script src="scripts/directives.js"></script>-->

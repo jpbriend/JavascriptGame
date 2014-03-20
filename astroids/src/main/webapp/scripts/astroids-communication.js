@@ -101,4 +101,19 @@ angular.module('AstroidsModule')
 
         return connectionsService;
     }
+)
+    .factory('leapService', function($rootScope) {
+        var leapController = new Leap.Controller({
+            host: '127.0.0.1',
+            port: 6437,
+            enableGestures: false,
+            frameEventName: 'animationFrame',
+            useAllPlugins: true
+        });
+
+        leapController.connect();
+
+        return leapController;
+    }
+
 );

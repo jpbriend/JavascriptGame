@@ -7,7 +7,7 @@
 
 var AstroidsModule = angular.module('AstroidsModule', ['angular.atmosphere']);
 
-AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$interval', 'shipDataService', 'connectionsService', 'utils', function($rootScope, $scope, $interval, shipDataService, connectionsService, utils) {
+AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$interval', 'shipDataService', 'connectionsService', 'utils', '$sce', 'leapService', function($rootScope, $scope, $interval, shipDataService, connectionsService, utils, $sce, leapService) {
 
     var canvas = document.getElementById('astroids');
     canvas.width = $("#astroids").css("width").substr(0, $("#astroids").css("width").length - 2);
@@ -71,6 +71,7 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
         }
     }, true);
     var gameLoop = function() {
+        debuggingDisplay();
         checkConnected();
         shipControl();
         bulletControl();
@@ -149,6 +150,20 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
         }
     };
     var shipControl = function() {
+        // LeapMotion
+        var frame = leapService.frame();
+        if (frame.hands.length > 0) {
+            var hand = frame.hands[0];
+            if (hand.palmNormal[0] > 0.02) {
+                // Turn left
+                $scope.player.rotation = ($scope.player.rotation - 0.4 * hand.palmNormal[0]).mod(6.28);
+            } else if (hand.palmNormal[0] < -0.02) {
+                // Turn right
+                $scope.player.rotation = ($scope.player.rotation - 0.4 * hand.palmNormal[0]).mod(6.28);
+            }
+        }
+
+
         if ($scope.keys.w) {
             $scope.player.dx = ($scope.player.dx + Math.sin($scope.player.rotation) * $scope.player.acceleration).max(10);
             $scope.player.dy = ($scope.player.dy + Math.cos($scope.player.rotation) * $scope.player.acceleration).max(10);
@@ -169,6 +184,16 @@ AstroidsModule.controller('AstroidsController', ['$rootScope', '$scope', '$inter
             console.log('Registering with the server ...');
             connectionsService.send({ "action": "connection", "target": "0" });
         }
+    };
+
+    var debuggingDisplay = function() {
+        var handString = "";
+        var frame = leapService.frame();
+        if (frame.hands && frame.hands.length > 0) {
+            var hand = frame.hands[0];
+            handString += "<p>Palm normal: " + hand.palmNormal[0] +'*'+ hand.palmNormal[1] +'*'+ hand.palmNormal[2] + "</p>";
+        }
+        $scope.leapmotion = $sce.trustAsHtml(handString);
     };
 
     // Run at 30 fps
