@@ -1,11 +1,11 @@
 package fr.octo.astroids.server.domain;
 
-public class Vector2 {
+public final class Vector2 {
 
-    public Double x;
-    public Double y;
+    public double x;
+    public double y;
 
-    public Vector2(Double x, Double y) {
+    public Vector2(double x, double y) {
         this.x = x;
         this.y = y;
     }
@@ -13,28 +13,29 @@ public class Vector2 {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Vector2)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         Vector2 vector2 = (Vector2) o;
 
-        if (x != null ? !x.equals(vector2.x) : vector2.x != null) return false;
-        if (y != null ? !y.equals(vector2.y) : vector2.y != null) return false;
+        if (Double.compare(vector2.x, x) != 0) return false;
+        if (Double.compare(vector2.y, y) != 0) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = x != null ? x.hashCode() : 0;
-        result = 31 * result + (y != null ? y.hashCode() : 0);
+        int result;
+        long temp;
+        temp = Double.doubleToLongBits(x);
+        result = (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(y);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
     }
 
     @Override
     public String toString() {
-        return "Vector2{" +
-                "x=" + x +
-                ", y=" + y +
-                '}';
+        return "(" + x + "," + y + ")";
     }
 }
