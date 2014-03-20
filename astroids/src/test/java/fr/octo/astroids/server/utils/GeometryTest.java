@@ -5,6 +5,8 @@ import fr.octo.astroids.server.domain.Vector2;
 import org.junit.Test;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -56,7 +58,7 @@ public class GeometryTest {
     public void testCoordinatesAfterRotation() {
         Vector2 point = new Vector2(2d, 0d);
         Double rotation = 50 * Math.PI / 180;// rotation of 50 degrees
-        DecimalFormat df = new DecimalFormat("0.00");
+        DecimalFormat df = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.ENGLISH));
         assertThat(df.format(Geometry.coordinatesAfterRotation(point, rotation).x)).isEqualTo("1.29");
         assertThat(df.format(Geometry.coordinatesAfterRotation(point, rotation).y)).isEqualTo("1.53");
     }
